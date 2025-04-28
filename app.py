@@ -6,7 +6,7 @@ import streamlit as st
 
 from utils import (analyze_with_huggingface, generate_visualizations,
                    load_data, load_huggingface_model,
-                   perform_rule_based_analysis)
+                   perform_rule_based_analysis, perform_specific_calculations)
 
 # Set page configuration
 st.set_page_config(
@@ -14,16 +14,6 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded"
 )
-#..
-# In the analyze_clicked block, after calling perform_rule_based_analysis
-# Add:
-specific_calculations = perform_specific_calculations(df, query)
-if specific_calculations:
-    # Add to analysis_results
-    analysis_results.update(specific_calculations)
-# App title and description
-st.title("📊 Data Analysis Chatbot")
-st.write("Upload your data file and ask questions to get insights and visualizations!")
 
 # Initialize session state variables if they don't exist
 if 'data' not in st.session_state:
@@ -36,6 +26,7 @@ with st.sidebar:
     st.header("Upload Data")
     uploaded_file = st.file_uploader("Choose a CSV, Excel, or JSON file", type=["csv", "xlsx", "json"])
     
+    # Check if the file is uploaded
     if uploaded_file is not None:
         # Process the uploaded file
         df, error = load_data(uploaded_file)
@@ -59,10 +50,8 @@ with st.sidebar:
     
     # Add model information in sidebar
     st.subheader("About")
-    st.write("""
-    This app uses Hugging Face models and rule-based analysis to process 
-    your data queries and generate visualizations. Free and open-source!
-    """)
+    st.write("""This app uses Hugging Face models and rule-based analysis to process 
+                your data queries and generate visualizations. Free and open-source!""")
 
 # Main area for data preview and chat interface
 if st.session_state['data'] is not None:
@@ -106,6 +95,11 @@ if st.session_state['data'] is not None:
             
             # Rule-based analysis
             analysis_results = perform_rule_based_analysis(df, query)
+            
+            # Perform specific calculations
+            specific_calculations = perform_specific_calculations(df, query)
+            if specific_calculations:
+                analysis_results.update(specific_calculations)
             
             # Generate visualizations
             visualizations = generate_visualizations(df, query)
