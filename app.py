@@ -109,7 +109,6 @@ if st.session_state['data'] is not None:
             
             # Generate visualizations
             visualizations = generate_visualizations(df, query)
-            
             # Combine analysis into a response
             response = f"{ai_response}\n\n"
             
