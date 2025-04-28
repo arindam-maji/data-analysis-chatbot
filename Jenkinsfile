@@ -1,45 +1,55 @@
 pipeline {
     agent any
-    
+
+    environment {
+        DOCKER_IMAGE = "data-analysis-chatbot:latest"
+    }
+
     stages {
         stage('Checkout') {
             steps {
                 checkout scm
             }
         }
-        
+
         stage('Setup Environment') {
             steps {
-                sh 'python -m pip install --upgrade pip'
-                sh 'pip install -r requirements.txt'
+                bat 'python -m pip install --upgrade pip'
+                bat 'pip install -r requirements.txt'
             }
         }
-        
+
         stage('Test') {
             steps {
-                sh 'echo "Tests would go here"'
-                // Add actual tests when you have them
+                bat 'echo "Tests would go here"'
+                // Add actual tests like:
                 // sh 'python -m pytest'
             }
         }
-        
+
         stage('Build Docker Image') {
             steps {
-                sh 'docker build -t data-analysis-chatbot:latest .'
+                bat 'docker-compose build'
             }
         }
-        
-        stage('Deploy') {
+
+        stage('Push Docker Image') {
             steps {
-                sh 'echo "Deployment steps would go here"'
-                // Example deployment commands:
-                // sh 'docker stop data-analysis-chatbot || true'
-                // sh 'docker rm data-analysis-chatbot || true'
-                // sh 'docker run -d -p 8501:8501 --name data-analysis-chatbot data-analysis-chatbot:latest'
+                script {
+                    // Push Docker Image to Docker Hub (or your container registry)
+                    bat 'docker tag data-analysis-chatbot:latest arindamcse/data-analysis-chatbot:latest'
+                    bat 'docker push arindamcse/data-analysis-chatbot:latest'
+                }
+            }
+        }
+
+        stage('Deploy with Docker Compose') {
+            steps {
+                bat 'docker-compose up -d'
             }
         }
     }
-    
+
     post {
         success {
             echo 'Pipeline executed successfully!'
